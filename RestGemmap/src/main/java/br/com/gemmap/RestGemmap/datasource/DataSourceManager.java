@@ -18,9 +18,13 @@ public class DataSourceManager {
     private final Environment env;
     private final Map<String, DataSource> allDataSources = new HashMap<>();
     private final Map<Integer, JdbcTemplate> jdbcTemplatesByCidade = new HashMap<>();
-
+    private String user;
+    private String password;
     @PostConstruct
     public void init() {
+        user = System.getenv("USERNAME_BD_RESTISSMAP");
+        password = System.getenv("PASS_BD_RESTISSMAP");
+
         for (CidadesEnum cidade : CidadesEnum.values()) {
             if (cidade != CidadesEnum.CEP) {
                 String contexto = cidade.getContexto().replace("/", "");
@@ -40,19 +44,23 @@ public class DataSourceManager {
     private DataSource createDataSource(String cidadeKey) {
         String prefix = "spring.datasource.cidades." + cidadeKey;
         String url = env.getProperty(prefix + ".url");
-        String username = env.getProperty(prefix + ".username");
-        String password = env.getProperty(prefix + ".password");
         String driverClassName = env.getProperty(prefix + ".driver-class-name");
 
-        if (url == null || username == null || password == null || driverClassName == null) {
+        if (url == null || user == null || password == null || driverClassName == null) {
             return null; // Config faltando
         }
 
         HikariDataSource ds = new HikariDataSource();
         ds.setJdbcUrl(url);
-        ds.setUsername(username);
+        ds.setUsername(user);
         ds.setPassword(password);
         ds.setDriverClassName(driverClassName);
+
+        // Configuração do pool
+        ds.setMaximumPoolSize(5);
+        ds.setMinimumIdle(2);
+        ds.setIdleTimeout(300_000); // 5 minutos
+        ds.setMaxLifetime(1_800_000); // 30 minutos
         return ds;
     }
 

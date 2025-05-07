@@ -20,7 +20,6 @@ public class NotaController {
     @GetMapping("{codigoCidade}/teste")
     public List<NotaDTO> listarNotas(@PathVariable int codigoCidade) {
         String chaveCidade = cidadeKeyService.buscarChavePorCidade(codigoCidade);
-        System.out.println("Chave da cidade: " + chaveCidade);
 
         JdbcTemplate jdbcTemplate = dataSourceManager.getJdbcTemplate(codigoCidade);
 

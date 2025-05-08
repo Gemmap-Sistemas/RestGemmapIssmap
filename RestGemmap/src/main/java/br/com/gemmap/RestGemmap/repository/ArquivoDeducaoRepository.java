@@ -1,5 +1,6 @@
 package br.com.gemmap.RestGemmap.repository;
 
+import br.com.gemmap.RestGemmap.util.SqlReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import java.util.Optional;
 public class ArquivoDeducaoRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SqlReader sqlReader;
 
     // Salva o arquivo
     public void salvarArquivo(String caminho, String idNota, String dataArquivo) throws Exception {
@@ -37,7 +39,8 @@ public class ArquivoDeducaoRepository {
 
     // Parte I da sincronização
     public String sincronizaArquivosDeducaoParteI(String data) throws Exception {
-        String sql = carregarSQL().replace(":dataDeSincronizacao", data);
+        String sql = sqlReader.load("sql/arquivo_deducao/sincroniza_parte1.sql")
+                .replace(":dataDeSincronizacao", data);
 
         StringBuilder retorno = new StringBuilder();
 
@@ -51,11 +54,5 @@ public class ArquivoDeducaoRepository {
         });
 
         return retorno.toString();
-    }
-
-    // Simulando o carregar do SQL externo
-    private String carregarSQL() throws Exception {
-        // Aqui você pode carregar do arquivo como antes
-        return "SELECT id_banco FROM algum_local WHERE data_sincronizacao = ':dataDeSincronizacao'";
     }
 }
